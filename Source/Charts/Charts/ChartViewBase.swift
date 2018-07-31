@@ -367,12 +367,6 @@ open class ChartViewBase: NSUIView, ChartDataProvider, AnimatorDelegate
             attributes: attrs)
     }
     
-    // MARK: - Accessibility
-
-    open override func accessibilityChildren() -> [Any]? {
-        return renderer?.accessibleChartElements
-    }
-
     // MARK: - Highlighting
     
     /// - returns: The array of currently highlighted values. This might an empty if nothing is highlighted.
