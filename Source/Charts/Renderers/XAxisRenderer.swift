@@ -218,6 +218,7 @@ open class XAxisRenderer: AxisRendererBase
             if viewPortHandler.isInBoundsX(position.x)
             {
                 let label = xAxis.valueFormatter?.stringForValue(xAxis.entries[i], axis: xAxis) ?? ""
+                let drawBorder = xAxis.highlightSelectedLabels.contains(label)
 
                 let labelns = label as NSString
                 
@@ -240,7 +241,7 @@ open class XAxisRenderer: AxisRendererBase
                         position.x += width / 2.0
                     }
                 }
-                
+
                 drawLabel(context: context,
                           formattedLabel: label,
                           x: position.x,
@@ -248,7 +249,7 @@ open class XAxisRenderer: AxisRendererBase
                           attributes: labelAttrs,
                           constrainedToSize: labelMaxSize,
                           anchor: anchor,
-                          angleRadians: labelRotationAngleRadians)
+                          angleRadians: labelRotationAngleRadians, drawBorder: drawBorder, xAxis: xAxis)
             }
         }
     }
@@ -261,7 +262,7 @@ open class XAxisRenderer: AxisRendererBase
         attributes: [NSAttributedString.Key : Any],
         constrainedToSize: CGSize,
         anchor: CGPoint,
-        angleRadians: CGFloat)
+        angleRadians: CGFloat, drawBorder: Bool, xAxis: XAxis)
     {
         ChartUtils.drawMultilineText(
             context: context,
@@ -270,8 +271,9 @@ open class XAxisRenderer: AxisRendererBase
             attributes: attributes,
             constrainedToSize: constrainedToSize,
             anchor: anchor,
-            angleRadians: angleRadians)
+            angleRadians: angleRadians, drawBorder: drawBorder, xAxis: xAxis)
     }
+
     
     open override func renderGridLines(context: CGContext)
     {
@@ -290,8 +292,6 @@ open class XAxisRenderer: AxisRendererBase
         context.clip(to: self.gridClippingRect)
         
         context.setShouldAntialias(xAxis.gridAntialiasEnabled)
-        context.setStrokeColor(xAxis.gridColor.cgColor)
-        context.setLineWidth(xAxis.gridLineWidth)
         context.setLineCap(xAxis.gridLineCap)
         
         if xAxis.gridLineDashLengths != nil
@@ -311,6 +311,16 @@ open class XAxisRenderer: AxisRendererBase
         
         for i in stride(from: 0, to: entries.count, by: 1)
         {
+            if xAxis.highlightGridOfEntries.contains(entries[i]) && xAxis.gridLineDashLengths != nil {
+                context.setStrokeColor(UIColor.black.cgColor)
+                context.setLineWidth(xAxis.gridLineWidth * 2)
+                context.setLineDash(phase: xAxis.gridLineDashPhase, lengths: xAxis.gridLineDashLengths)
+            } else {
+                context.setLineWidth(xAxis.gridLineWidth)
+                context.setStrokeColor(xAxis.gridColor.cgColor)
+                context.setLineDash(phase: 0.0, lengths: [])
+            }
+
             position.x = CGFloat(entries[i])
             position.y = position.x
             position = position.applying(valueToPixelMatrix)

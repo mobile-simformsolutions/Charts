@@ -26,6 +26,15 @@ open class AxisBase: ComponentBase
     
     @objc open var labelFont = NSUIFont.systemFont(ofSize: 10.0)
     @objc open var labelTextColor = NSUIColor.labelOrBlack
+
+    /// Show selected xAxis Label
+    @objc open var highlightSelectedLabels = [String]()
+    @objc open var selectedLabelBorderWidth = CGFloat(0.5)
+    @objc open var selectedLabelBorderColor = NSUIColor.labelOrBlack
+    @objc open var selectedLabelBackgroundColor = NSUIColor.white
+
+    /// Custom grid for specific entries
+    @objc open var highlightGridOfEntries = [Double]()
     
     @objc open var axisLineColor = NSUIColor.gray
     @objc open var axisLineWidth = CGFloat(0.5)

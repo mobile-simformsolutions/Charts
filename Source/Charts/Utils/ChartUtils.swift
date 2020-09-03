@@ -243,59 +243,72 @@ open class ChartUtils
         NSUIGraphicsPopContext()
     }
     
-    internal class func drawMultilineText(context: CGContext, text: String, knownTextSize: CGSize, point: CGPoint, attributes: [NSAttributedString.Key : Any]?, constrainedToSize: CGSize, anchor: CGPoint, angleRadians: CGFloat)
+    internal class func drawMultilineText(context: CGContext, text: String, knownTextSize: CGSize, point: CGPoint, attributes: [NSAttributedString.Key : Any]?, constrainedToSize: CGSize, anchor: CGPoint, angleRadians: CGFloat, drawBorder: Bool = false, xAxis: XAxis? = nil)
     {
-        var rect = CGRect(origin: CGPoint(), size: knownTextSize)
-        
+
+        let widthPadding: CGFloat = 10
+        let heightPadding: CGFloat = 2
+        let maxSize = CGSize(width: knownTextSize.width + widthPadding, height: knownTextSize.height + heightPadding)
+        var rect = CGRect(origin: CGPoint(), size: maxSize)
+
         NSUIGraphicsPushContext(context)
-        
+
         if angleRadians != 0.0
         {
             // Move the text drawing rect in a way that it always rotates around its center
-            rect.origin.x = -knownTextSize.width * 0.5
-            rect.origin.y = -knownTextSize.height * 0.5
-            
+            rect.origin.x = -maxSize.width * 0.5
+            rect.origin.y = -maxSize.height * 0.5
+
             var translate = point
-            
+
             // Move the "outer" rect relative to the anchor, assuming its centered
             if anchor.x != 0.5 || anchor.y != 0.5
             {
-                let rotatedSize = knownTextSize.rotatedBy(radians: angleRadians)
-                
+                let rotatedSize = maxSize.rotatedBy(radians: angleRadians)
+
                 translate.x -= rotatedSize.width * (anchor.x - 0.5)
                 translate.y -= rotatedSize.height * (anchor.y - 0.5)
             }
-            
+
             context.saveGState()
             context.translateBy(x: translate.x, y: translate.y)
             context.rotate(by: angleRadians)
-            
+
             (text as NSString).draw(with: rect, options: .usesLineFragmentOrigin, attributes: attributes, context: nil)
-            
             context.restoreGState()
         }
         else
         {
             if anchor.x != 0.0 || anchor.y != 0.0
             {
-                rect.origin.x = -knownTextSize.width * anchor.x
-                rect.origin.y = -knownTextSize.height * anchor.y
+                rect.origin.x = -maxSize.width * anchor.x
+                rect.origin.y = -maxSize.height * anchor.y
             }
-            
+
             rect.origin.x += point.x
             rect.origin.y += point.y
-            
+
             (text as NSString).draw(with: rect, options: .usesLineFragmentOrigin, attributes: attributes, context: nil)
+
+            if drawBorder, let axis = xAxis {
+                let bezierPath = UIBezierPath(roundedRect: rect, cornerRadius: rect.height / 2)
+                context.setFillColor(axis.selectedLabelBackgroundColor.cgColor)
+                context.setStrokeColor(axis.selectedLabelBorderColor.cgColor)
+                context.setLineWidth(axis.selectedLabelBorderWidth)
+                context.addPath(bezierPath.cgPath)
+                context.drawPath(using: .fillStroke)
+            }
         }
-        
+
         NSUIGraphicsPopContext()
     }
-    
-    internal class func drawMultilineText(context: CGContext, text: String, point: CGPoint, attributes: [NSAttributedString.Key : Any]?, constrainedToSize: CGSize, anchor: CGPoint, angleRadians: CGFloat)
+
+    internal class func drawMultilineText(context: CGContext, text: String, point: CGPoint, attributes: [NSAttributedString.Key : Any]?, constrainedToSize: CGSize, anchor: CGPoint, angleRadians: CGFloat, drawBorder: Bool = false, xAxis: XAxis? = nil)
     {
         let rect = text.boundingRect(with: constrainedToSize, options: .usesLineFragmentOrigin, attributes: attributes, context: nil)
-        drawMultilineText(context: context, text: text, knownTextSize: rect.size, point: point, attributes: attributes, constrainedToSize: constrainedToSize, anchor: anchor, angleRadians: angleRadians)
+        drawMultilineText(context: context, text: text, knownTextSize: rect.size, point: point, attributes: attributes, constrainedToSize: constrainedToSize, anchor: anchor, angleRadians: angleRadians, drawBorder: drawBorder, xAxis: xAxis)
     }
+
 
     private class func generateDefaultValueFormatter() -> IValueFormatter
     {

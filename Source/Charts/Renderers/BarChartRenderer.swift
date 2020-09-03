@@ -396,7 +396,13 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 }
                 
                 context.setFillColor(dataSet.barShadowColor.cgColor)
-                context.fill(barRect)
+                if dataSet.isCornerRadiusEnabled {
+                    let bezierPath = UIBezierPath(roundedRect: barRect, cornerRadius: barRect.width / 2)
+                    context.addPath(bezierPath.cgPath)
+                    context.drawPath(using: .fill)
+                } else {
+                    context.fill(barRect)
+                }
             }
         }
         
@@ -431,7 +437,13 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 context.setFillColor(dataSet.color(atIndex: j).cgColor)
             }
             
-            context.fill(barRect)
+            if dataSet.isCornerRadiusEnabled {
+                let bezierPath = UIBezierPath(roundedRect: barRect, cornerRadius: barRect.width / 2)
+                context.addPath(bezierPath.cgPath)
+                context.drawPath(using: .fill)
+            } else {
+                context.fill(barRect)
+            }
             
             if drawBorder
             {
@@ -811,7 +823,13 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 
                 setHighlightDrawPos(highlight: high, barRect: barRect)
                 
-                context.fill(barRect)
+                if set.isCornerRadiusEnabled {
+                    let bezierPath = UIBezierPath(roundedRect: barRect, cornerRadius: barRect.width / 2)
+                    context.addPath(bezierPath.cgPath)
+                    context.drawPath(using: .fill)
+                } else {
+                    context.fill(barRect)
+                }
             }
         }
         
